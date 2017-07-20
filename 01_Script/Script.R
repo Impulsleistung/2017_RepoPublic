@@ -439,3 +439,42 @@ head(weather2)
 
 ###########################
 
+# Count missing values
+sum(is.na(weather6))
+
+# Find missing values
+summary(weather6)
+
+# Find indices of NAs in Max.Gust.SpeedMPH
+ind <- which(is.na(weather6$Max.Gust.SpeedMPH ))
+
+# Look at the full rows for records missing Max.Gust.SpeedMPH
+weather6[ind, ]
+
+###########################
+
+# Review distributions for all variables
+summary(weather6)
+
+# Find row with Max.Humidity of 1000
+ind <- which(weather6$Max.Humidity == 1000)
+
+# Look at the data for that day
+weather6[ind, ]
+
+# Change 1000 to 100
+weather6$Max.Humidity[ind] <- 100
+
+###########################
+
+# Clean up column names
+names(weather6) <- new_colnames
+
+# Replace empty cells in events column
+weather6$events[weather6$events == ""] <- "None"
+    
+# Print the first 6 rows of weather6
+head(weather6)
+
+###########################
+
