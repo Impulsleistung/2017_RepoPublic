@@ -478,3 +478,16 @@ head(weather6)
 
 ###########################
 
+# Subsetting data with brackets
+# Also, recall that you can use square brackets to subset a data frame as follows:
+
+my_df[1:5, ] # First 5 rows of my_df
+my_df[, 4]   # Fourth column of my_df
+
+# Alternatively, you can remove rows and columns using negative indices. For example:
+
+my_df[-(1:5), ] # Omit first 5 rows of my_df
+my_df[, -4]     # Omit fourth column of my_df
+
+###########################
+
