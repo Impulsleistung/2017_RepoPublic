@@ -491,3 +491,53 @@ my_df[, -4]     # Omit fourth column of my_df
 
 ###########################
 
+## sales5 is pre-loaded
+# convert all columns with dates to Date by using lubridate
+
+# Load stringr
+library(stringr)
+
+# Find columns of sales5 containing "dt": date_cols
+date_cols<-str_detect( names(sales5), "dt")
+
+# Load lubridate
+library(lubridate)
+
+# Coerce date columns into Date objects
+sales5[, date_cols] <- lapply(sales5[,date_cols] , ymd)
+
+###########################
+
+# Remove rows 1, 7, and 11 of mbta: mbta2
+mbta2<-mbta[-c(1,7,11),]
+
+# Remove the first column of mbta2: mbta3
+mbta3<-mbta2[,-1]
+
+###########################
+
+# Pre-Analysis of big DataSet
+# Load dplyr
+library(dplyr)
+
+# View a glimpse of food
+glimpse(food)
+
+# View column names of food
+names(food)
+
+###########################
+
+# Two ways of applying a function to a subset of data
+# Change columns to numeric using dplyr (don't change)
+library(dplyr)
+example <- mutate_each(att5, funs(as.numeric), -state)
+
+# Define vector containing numerical columns: cols
+cols<-c(2:5)
+
+# Use sapply to coerce cols to numeric
+att5[, cols] <- sapply(att5[, cols],as.numeric)
+
+###########################
+
