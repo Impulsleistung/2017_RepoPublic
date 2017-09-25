@@ -995,3 +995,20 @@ both_na <- function(x, y) {
 both_na(x, y)
 
 #############
+
+# Change settings in the working environment
+# Read in the swimming_pools.csv to pools
+pools <- read.csv("swimming_pools.csv")
+
+# Examine the structure of pools
+str(pools)
+
+# Change the global stringsAsFactor option to FALSE
+options(stringsAsFactors = FALSE)
+
+# Read in the swimming_pools.csv to pools2
+pools2 <- read.csv("swimming_pools.csv")
+
+# Examine the structure of pools2
+str(pools2)
+
