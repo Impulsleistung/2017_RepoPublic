@@ -132,3 +132,170 @@ filter(hflights, TaxiIn + TaxiOut > AirTime)
 
 ##############################################
 
+# Select the flights that had JFK as their destination: c1
+c1 <- filter(hflights, Dest == "JFK")
+
+# Combine the Year, Month and DayofMonth variables to create a Date column: c2
+c2 <- mutate(c1, Date = paste(Year, Month, DayofMonth,sep = "-"))
+
+# Print out a selection of columns of c2
+select(c2, Date, DepTime, ArrTime, TailNum)
+
+#################################
+
+# arrange() function for sorting rows
+# Definition of dtc
+dtc <- filter(hflights, Cancelled == 1, !is.na(DepDelay))
+
+# Arrange dtc by departure delays
+arrange(dtc, DepDelay)
+
+# Arrange dtc so that cancellation reasons are grouped
+arrange(dtc, CancellationCode)
+
+# Arrange dtc according to carrier and departure delays
+arrange(dtc, UniqueCarrier, DepDelay)
+
+#################################
+
+# dplyr and the hflights tbl are available
+
+# Arrange according to carrier and decreasing departure delays
+arrange(hflights, UniqueCarrier, desc(DepDelay))
+
+# Arrange flights by total delay (normal order).
+arrange(hflights, ArrDelay+DepDelay)
+
+#################################
+
+# hflights and dplyr are loaded in the workspace
+
+# Print out a summary with variables min_dist and max_dist
+summarise(hflights, min_dist= min(Distance), max_dist=max(Distance) )
+
+# Print out a summary with variable max_div
+# Quick and dirty, but required
+summarise(filter(hflights, Diverted != 0), max_div= max(Distance) )
+
+#################################
+
+# hflights is available
+# How to use complete.cases to filter NA 
+# Remove rows that have NA ArrDelay: temp1
+temp1 <- filter(hflights, complete.cases(ArrDelay))
+
+# Generate summary about ArrDelay column of temp1
+summarise(temp1, earliest = min(ArrDelay), average = mean(ArrDelay) ,
+                latest = max(ArrDelay), sd = sd(ArrDelay)   )
+
+# Keep rows that have no NA TaxiIn and no NA TaxiOut: temp2
+temp2 <- filter(hflights, complete.cases(TaxiIn, TaxiOut) )
+
+# Print the maximum taxiing difference of temp2 with summarise()
+summarise(temp2, max_taxi_diff= max(abs(TaxiIn-TaxiOut)))
+
+#################################
+
+# dplyr provides several helpful aggregate functions of its own, in addition to the ones that are already defined in R. These include:
+
+    # first(x) - The first element of vector x.
+    # last(x) - The last element of vector x.
+    # nth(x, n) - The nth element of vector x.
+    # n() - The number of rows in the data.frame or group of observations that summarise() describes.
+    # n_distinct(x) - The number of unique values in vector x.
+
+# hflights is available with full names for the carriers
+
+# Generate summarizing statistics for hflights
+summarise(hflights,
+          n_obs = n(),
+          n_carrier = n_distinct(UniqueCarrier),
+          n_dest = n_distinct(Dest) )
+
+# All American Airline flights
+aa <- filter(hflights, UniqueCarrier == "American")
+
+# Generate summarizing statistics for aa 
+summarise(aa, n_flights=n(), n_canc=sum(Cancelled!=0), 
+                   avg_delay=mean(ArrDelay, na.rm=TRUE) )
+				   
+#################################
+
+# Use dplyr functions and the pipe operator to transform the following English sentences into R code:
+
+    # Take the hflights data set and then ...
+    # Add a variable named diff that is the result of subtracting TaxiIn from TaxiOut, and then ...
+    # Pick all of the rows whose diff value does not equal NA, and then ...
+    # Summarise the data set with a value named avg that is the mean diff value.
+	
+# Write the 'piped' version of the English sentences.
+hflights %>% mutate(diff = TaxiOut - TaxiIn) %>% 
+  filter(complete.cases(diff)) %>% summarise(avg=mean(diff))
+  
+#################################
+
+
+    # mutate() the hflights dataset and add two variables:
+        # RealTime: the actual elapsed time plus 100 minutes (for the overhead that flying involves) and
+        # mph: calculated as Distance / RealTime * 60, then
+    # filter() to keep observations that have an mph that is not NA and that is below 70, finally
+    # summarise() the result by creating four summary variables:
+        # n_less, the number of observations,
+        # n_dest, the number of destinations,
+        # min_dist, the minimum distance and
+        # max_dist, the maximum distance.
+		
+# Chain together mutate(), filter() and summarise()
+hflights %>%
+  mutate(RealTime = ActualElapsedTime+100, mph=Distance/RealTime*60) %>%
+  filter(complete.cases(mph), mph < 70 ) %>%
+  summarise(n_less=n(), n_dest= n_distinct(Dest), min_dist=min(Distance), max_dist=max(Distance) )
+
+#################################
+
+
+    # filter() the hflights tbl to keep only observations whose DepTime is not NA, whose ArrTime is not NA and for which DepTime exceeds ArrTime.
+    # Pipe the result into a summarise() call to create a single summary variable: num, that simply counts the number of observations.
+# Count the number of overnight flights
+hflights %>%
+  filter(complete.cases(DepTime, ArrTime) & DepTime>ArrTime  ) %>%
+  summarise(num=n())
+  
+#################################
+
+# group_by() lets you define groups within your data set. Its influence becomes clear when calling summarise() on a grouped dataset: summarising statistics are calculated for the different groups separately.
+
+# In this exercise, you are going to create an ordered per-carrier summary of hflights by combining group_by(), summarise() and arrange().
+# Instructions
+
+    # Use group_by() to group hflights by UniqueCarrier.
+    # summarise() the grouped tbl with two summary variables:
+        # p_canc, the percentage of cancelled flights
+        # avg_delay, the average arrival delay of flights whose delay does not equal NA.
+    # Finally, order the carriers in the summary from low to high by their average arrival delay. Use percentage of flights cancelled to break any ties.
+
+# Make an ordered per-carrier summary of hflights
+hflights %>%
+  group_by(UniqueCarrier) %>%
+  summarise(p_canc = mean(Cancelled==1)*100,
+            avg_delay = mean(ArrDelay,na.rm=TRUE)) %>%
+  arrange(avg_delay, p_canc)
+  
+#################################
+
+    # filter() the hflights tbl to only keep observations for which ArrDelay is not NA and positive.
+    # Use group_by() on the result to group by UniqueCarrier.
+    # Next, use summarise() to calculate the average ArrDelay per carrier. Call this summary variable avg.
+    # Feed the result into a mutate() call: create a new variable, rank, calculated as rank(avg).
+    # Finally, arrange by this new rank variable
+
+# Ordered overview of average arrival delays per carrier
+hflights %>%
+  filter(complete.cases(ArrDelay), ArrDelay>0 ) %>%
+  group_by(UniqueCarrier) %>%
+  summarise(avg=mean(ArrDelay) ) %>%
+  mutate(rank=rank(avg) ) %>%
+  arrange(rank)
+  
+#################################
+
