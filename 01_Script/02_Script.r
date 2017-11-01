@@ -299,3 +299,54 @@ hflights %>%
   
 #################################
 
+# TODO !!!
+    # How many airplanes flew to only one destination? The tbl you print out should have a single column, named nplanes and a single row.
+    # Find the most visited destination for each carrier. The tbl you print out should contain four columns:
+        # UniqueCarrier and Dest,
+        # n, how often a carrier visited a particular destination,
+        # rank, how each destination ranks per carrier. rank should be 1 for every row, as you want to find the most visited destination for each carrier.
+
+# How many airplanes only flew to one destination?
+hflights %>%
+  group_by(TailNum) %>%
+  summarise(ndest = n_distinct(Dest)) %>%
+  filter(ndest == 1) %>%
+  summarise(nplanes = n())
+
+# Find the most visited destination for each carrier
+hflights %>% 
+  group_by(UniqueCarrier, Dest) %>%
+  summarise(n = n()) %>%
+  mutate(rank = rank(desc(n))) %>%
+  filter(rank == 1)
+  
+#################################
+
+# Join tables by multiple keys
+# Fix the code to recreate bands2
+left_join(bands, artists, by = c("first", "last"))
+
+# left_join() is equivalent to right_join() with the order of the datasets reversed. Notice that each used the same by argument
+# Finish the code below to recreate bands3 with a right join
+bands2 <- left_join(bands, artists, by = c("first", "last"))
+bands3 <- right_join(artists, bands, by = c("first", "last"))
+
+# Check that bands3 is equal to bands2
+setequal(bands2,bands3)
+
+#################################
+
+# Using pipelines on join command
+# Find guitarists in bands dataset (don't change)
+temp <- left_join(bands, artists, by = c("first", "last"))
+temp <- filter(temp, instrument == "Guitar")
+select(temp, first, last, band)
+
+# Reproduce code above using pipes
+bands %>% 
+  left_join(artists, by = c("first", "last")) %>%
+  filter(instrument == "Guitar") %>%
+  select(first, last, band)
+  
+#################################
+
